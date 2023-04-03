@@ -49,6 +49,7 @@ class AcceptState(StatesGroup):
     photo_vvg_3 = State()
     photo_vvg_4 = State()
     photo_vvg_5 = State()
+    yes_vvg_round = State()
 
 
 

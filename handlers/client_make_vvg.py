@@ -152,10 +152,55 @@ async def process_photo_vvg_2(message: types.Message, state: FSMContext):
                    f'{data["metr"]}м - ID заготовок:  {data["piece_1"]}; {data["piece_2"]} верно?'
         await bot.send_message(message.from_user.id, new_text, reply_markup=keyboard_yes_no)
 
-        await state.finish()
+        await AcceptState.photo_vvg_3.set()
     else:
         await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
-        await AcceptState.photo_vvg_1.set()
+        await AcceptState.photo_vvg_2.set()
+
+async def process_photo_vvg_3(message: types.Message, state: FSMContext):
+    if message.photo or message.document and 'image' in message.document.mime_type:
+        file_id = message.photo[-1].file_id if message.photo else message.document.file_id
+        info = await handle_photos_and_documents_id(file_id, message, state)
+
+        ID = info[-3].replace("ID: ", "")
+        wire = info[1].replace("Проволка: ", "")
+        color = info[2].replace("Цвет: ", "")
+        await state.update_data(piece_3=ID)
+        await bot.send_message(message.from_user.id, 'Фото 2:')
+        await AcceptState.photo_vvg_4.set()
+    else:
+        await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
+        await AcceptState.photo_vvg_3.set()
+
+async def process_photo_vvg_4(message: types.Message, state: FSMContext):
+    if message.photo or message.document and 'image' in message.document.mime_type:
+        file_id = message.photo[-1].file_id if message.photo else message.document.file_id
+        info = await handle_photos_and_documents_id(file_id, message, state)
+
+        ID = info[-3].replace("ID: ", "")
+        wire = info[1].replace("Проволка: ", "")
+        color = info[2].replace("Цвет: ", "")
+        await state.update_data(piece_4=ID)
+        await bot.send_message(message.from_user.id, 'Фото 2:')
+        await AcceptState.photo_vvg_5.set()
+    else:
+        await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
+        await AcceptState.photo_vvg_4.set()
+
+async def process_photo_vvg_5(message: types.Message, state: FSMContext):
+    if message.photo or message.document and 'image' in message.document.mime_type:
+        file_id = message.photo[-1].file_id if message.photo else message.document.file_id
+        info = await handle_photos_and_documents_id(file_id, message, state)
+
+        ID = info[-3].replace("ID: ", "")
+        wire = info[1].replace("Проволка: ", "")
+        color = info[2].replace("Цвет: ", "")
+        await state.update_data(piece_5=ID)
+        await bot.send_message(message.from_user.id, 'Фото 2:')
+        await AcceptState.yes_vvg_round.set()
+    else:
+        await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
+        await AcceptState.photo_vvg_5.set()
 
 
 async def firs_yes_vvg(callback_query: types.CallbackQuery, state: FSMContext):
@@ -185,3 +230,6 @@ def register_handlers_client_make_vvg(dp: Dispatcher):
     dp.register_message_handler(process_photo_vvg, content_types=['photo', 'document'], state=AcceptState.photo_vvg)
     dp.register_message_handler(process_photo_vvg_1, content_types=['photo', 'document'], state=AcceptState.photo_vvg_1)
     dp.register_message_handler(process_photo_vvg_2, content_types=['photo', 'document'], state=AcceptState.photo_vvg_2)
+    dp.register_message_handler(process_photo_vvg_3, content_types=['photo', 'document'], state=AcceptState.photo_vvg_3)
+    dp.register_message_handler(process_photo_vvg_4, content_types=['photo', 'document'], state=AcceptState.photo_vvg_4)
+    dp.register_message_handler(process_photo_vvg_5, content_types=['photo', 'document'], state=AcceptState.photo_vvg_5)
