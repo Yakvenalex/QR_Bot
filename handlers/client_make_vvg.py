@@ -147,15 +147,20 @@ async def process_photo_vvg_2(message: types.Message, state: FSMContext):
         await state.update_data(piece_2=ID)
         data = await state.get_data()
 
-        new_text = f'Изготовить ВВГнг(А)-LS {data["count_pieces"]}х{data["section_vvg"]} - ' \
-                   f'{info[1].replace("Проволка: ", "")} - ' \
-                   f'{data["metr"]}м - ID заготовок:  {data["piece_1"]}; {data["piece_2"]} верно?'
-        await bot.send_message(message.from_user.id, new_text, reply_markup=keyboard_yes_no)
+        if int(data['count_pieces']) == 2:
+            new_text = f'Изготовить ВВГнг(А)-LS {data["count_pieces"]}х{data["section_vvg"]} - ' \
+                       f'{info[1].replace("Проволка: ", "")} - ' \
+                       f'{data["metr"]}м - ID заготовок:  {data["piece_1"]}; {data["piece_2"]} верно?'
+            await bot.send_message(message.from_user.id, new_text, reply_markup=keyboard_yes_no)
 
-        await AcceptState.photo_vvg_3.set()
+            await AcceptState.yes_vvg_round()
+        else:
+            await bot.send_message(message.from_user.id, 'Фото 3:')
+            await AcceptState.photo_vvg_3.set()
     else:
         await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
         await AcceptState.photo_vvg_2.set()
+
 
 async def process_photo_vvg_3(message: types.Message, state: FSMContext):
     if message.photo or message.document and 'image' in message.document.mime_type:
@@ -166,11 +171,23 @@ async def process_photo_vvg_3(message: types.Message, state: FSMContext):
         wire = info[1].replace("Проволка: ", "")
         color = info[2].replace("Цвет: ", "")
         await state.update_data(piece_3=ID)
-        await bot.send_message(message.from_user.id, 'Фото 2:')
-        await AcceptState.photo_vvg_4.set()
+        data = await state.get_data()
+
+        if int(data['count_pieces']) == 3:
+            new_text = f'Изготовить ВВГнг(А)-LS {data["count_pieces"]}х{data["section_vvg"]} - ' \
+                       f'{info[1].replace("Проволка: ", "")} - ' \
+                       f'{data["metr"]}м - ID заготовок:  {data["piece_1"]}; {data["piece_2"]}; {data["piece_3"]}' \
+                       f' верно?'
+            await bot.send_message(message.from_user.id, new_text, reply_markup=keyboard_yes_no)
+
+            await AcceptState.yes_vvg_round()
+        else:
+            await bot.send_message(message.from_user.id, 'Фото 4:')
+            await AcceptState.photo_vvg_4.set()
     else:
         await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
         await AcceptState.photo_vvg_3.set()
+
 
 async def process_photo_vvg_4(message: types.Message, state: FSMContext):
     if message.photo or message.document and 'image' in message.document.mime_type:
@@ -181,11 +198,23 @@ async def process_photo_vvg_4(message: types.Message, state: FSMContext):
         wire = info[1].replace("Проволка: ", "")
         color = info[2].replace("Цвет: ", "")
         await state.update_data(piece_4=ID)
-        await bot.send_message(message.from_user.id, 'Фото 2:')
-        await AcceptState.photo_vvg_5.set()
+        data = await state.get_data()
+
+        if int(data['count_pieces']) == 4:
+            new_text = f'Изготовить ВВГнг(А)-LS {data["count_pieces"]}х{data["section_vvg"]} - ' \
+                       f'{info[1].replace("Проволка: ", "")} - ' \
+                       f'{data["metr"]}м - ID заготовок:  {data["piece_1"]}; {data["piece_2"]}; {data["piece_3"]};' \
+                       f' {data["piece_4"]} верно?'
+            await bot.send_message(message.from_user.id, new_text, reply_markup=keyboard_yes_no)
+
+            await AcceptState.yes_vvg_round()
+        else:
+            await bot.send_message(message.from_user.id, 'Фото 5:')
+            await AcceptState.photo_vvg_5.set()
     else:
         await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
         await AcceptState.photo_vvg_4.set()
+
 
 async def process_photo_vvg_5(message: types.Message, state: FSMContext):
     if message.photo or message.document and 'image' in message.document.mime_type:
@@ -196,8 +225,17 @@ async def process_photo_vvg_5(message: types.Message, state: FSMContext):
         wire = info[1].replace("Проволка: ", "")
         color = info[2].replace("Цвет: ", "")
         await state.update_data(piece_5=ID)
-        await bot.send_message(message.from_user.id, 'Фото 2:')
-        await AcceptState.yes_vvg_round.set()
+        data = await state.get_data()
+
+        if int(data['count_pieces']) == 5:
+            new_text = f'Изготовить ВВГнг(А)-LS {data["count_pieces"]}х{data["section_vvg"]} - ' \
+                       f'{info[1].replace("Проволка: ", "")} - ' \
+                       f'{data["metr"]}м - ID заготовок:  {data["piece_1"]}; {data["piece_2"]}; {data["piece_3"]}; ' \
+                       f'{data["piece_4"]}, ; {data["piece_5"]} верно?'
+            await bot.send_message(message.from_user.id, new_text, reply_markup=keyboard_yes_no)
+            await AcceptState.yes_vvg_round.set()
+        else:
+            await state.finish()
     else:
         await bot.send_message(message.from_user.id, 'Пришлите фото QR-кода')
         await AcceptState.photo_vvg_5.set()
