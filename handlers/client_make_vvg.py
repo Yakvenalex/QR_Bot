@@ -136,3 +136,5 @@ async def firs_yes_vvg(callback_query: types.CallbackQuery, state: FSMContext):
     else:
         await bot.answer_callback_query(callback_query.id, text=f"НЕТ!")
         await AcceptState.restart_round_vvg.set()
+
+
