@@ -3,11 +3,7 @@ from create_bot import bot, AcceptState
 from aiogram.dispatcher import FSMContext
 from get_qr import get_id, get_date_now, generate_qr_code, get_data_to_db, write_to_db, create_data_to_write_in_qr
 from aiogram.types import ParseMode
-
-
-async def send_qr_code(user_id, data_send):
-    with open(data_send[1], 'rb') as qr:
-        await bot.send_photo(user_id, qr, caption=data_send[0], parse_mode=ParseMode.HTML)
+from async_funck import send_qr_code
 
 
 async def process_wire_2(message: types.Message, state: FSMContext):

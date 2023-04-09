@@ -6,13 +6,8 @@ from get_qr import get_id, get_date_now, generate_qr_code, get_data_to_db, write
 from aiogram.types import ParseMode
 from keyboards import keyboard_manufacturer_list_wire, keyboard_manufacturer_wire, keyboard_supplier_wire_list, \
     keyboard_type_wire_list, keyboard_type_wire, keyboard_yes_no, keyboard_type_yes_no_list, keyboard_type_product, \
-    keyboard_drawing_wire_list, keyboard_drawing_wire, keyboard_supplier_wire
-
-
-async def send_qr_code(user_id, data_send):
-    with open(data_send[1], 'rb') as qr:
-        await bot.send_photo(user_id, qr, caption=data_send[0], parse_mode=ParseMode.HTML)
-
+    keyboard_drawing_wire_list, keyboard_drawing_wire, keyboard_supplier_wire, keyboard_print
+from async_funck import send_qr_code
 
 async def stop_product(user_id):
     await bot.send_message(user_id, 'Выберите тип продукта:', reply_markup=keyboard_type_product)
@@ -140,8 +135,21 @@ async def process_end_wire(message: types.Message, state: FSMContext):
 
 
 async def check(callback_query: types.CallbackQuery, state: FSMContext):
+    user_id = callback_query.from_user.id
     if callback_query.data == 'ДА':
         await bot.answer_callback_query(callback_query.id, text=f"ДА!")
+        data = await state.get_data()
+        await bot.send_message(user_id, dict_to_string(create_data_to_send(data)), reply_markup=keyboard_print)
+        await AcceptState.print_plasticat.set()
+    else:
+        await bot.answer_callback_query(callback_query.id, text=f"НЕТ!")
+        await bot.send_message(callback_query.from_user.id, 'Выберите тип продукта:',
+                               reply_markup=keyboard_type_product)
+        await AcceptState.type_product.set()
+
+async def print_wire(callback_query: types.CallbackQuery, state: FSMContext):
+    if callback_query.data == 'печать':
+        await bot.answer_callback_query(callback_query.id, text=f"сейчас я распечатаю QR-код")
         data = await state.get_data()
         data_db = get_data_to_db(data)
         write_to_db(data_db)
@@ -149,11 +157,6 @@ async def check(callback_query: types.CallbackQuery, state: FSMContext):
         data_send = generate_qr_code(data_dict)
         await send_qr_code(data['user_id'], data_send)
         await state.finish()
-    else:
-        await bot.answer_callback_query(callback_query.id, text=f"НЕТ!")
-        await bot.send_message(callback_query.from_user.id, 'Выберите тип продукта:',
-                               reply_markup=keyboard_type_product)
-        await AcceptState.type_product.set()
 
 
 

@@ -49,17 +49,20 @@ class Database:
         except:
             print('Таблица уже существует')
 
-    def add_automate(self, id, type_product, wire, plasticat, volume, metr, supplier, drawing, manufacturer, date_now):
-        sql = 'INSERT INTO AllQrCodes(ID, ТипПродукта, Проволка, Пластикат, Количество, Метраж, Поставщик, Волочение, Изготовитель, Дата) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        parameters = (id, type_product, wire, plasticat, volume, metr, supplier, drawing, manufacturer, date_now)
+    def add_automate(self, id, type_product, wire, plasticat, volume, metr, supplier, drawing, manufacturer, date_now,
+                     user_id, user_descript):
+        sql = 'INSERT INTO AllQrCodes(ID, ТипПродукта, Проволка, Пластикат, Количество, Метраж, Поставщик, Волочение, Изготовитель, Дата, user_id, user_descript) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        parameters = (
+        id, type_product, wire, plasticat, volume, metr, supplier, drawing, manufacturer, date_now, user_id,
+        user_descript)
         try:
             self.execute(sql, parameters=parameters, commit=True)
             return True
         except:
             return False
 
-
-    def add_operation_puv(self, id, type_product, wire, color, date_now, user_id, user_descript, metr, defect_reason=None):
+    def add_operation_puv(self, id, type_product, wire, color, date_now, user_id, user_descript, metr,
+                          defect_reason=None):
         sql = 'INSERT INTO AllOperationQR(id, type_operation, wire, color, date_time, user_id, user_descript, metr, defect_reason) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
         parameters = (id, type_product, wire, color, date_now, user_id, user_descript, metr, defect_reason)
         try:
@@ -115,6 +118,23 @@ class Database:
         sql = "DELETE FROM AllProducts WHERE "
         sql, parameters = self.format_args(sql, kwargs)
         self.execute(sql, parameters, commit=True)
+
+    def add_operation_twinse(self, ID, Name_twinse, Wire, Metr, Date, Operator_id, Operator_name, Section, Piece_1,
+                             Piece_2, Piece_3, Piece_4, Piece_5):
+        sql = 'INSERT INTO AllTwinse(ID, Name_twinse, Wire, Metr, Date, Operator_id, Operator_name, Section, ' \
+              'Piece_1, Piece_2, Piece_3, Piece_4, Piece_5) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        parameters = (ID, Name_twinse, Wire, Metr, Date, Operator_id, Operator_name, Section, Piece_1, Piece_2, Piece_3,
+                      Piece_4, Piece_5)
+        try:
+            self.execute(sql, parameters=parameters, commit=True)
+            return True
+        except Exception as EX:
+            print(EX)
+            return False
+
+    def select_all_products_twinse(self):
+        sql = "SELECT * FROM AllTwinse"
+        return self.execute(sql, fetchall=True)
 
 
 def logger(statement):

@@ -15,6 +15,32 @@ def increment_max_number(numbers_list=[]):
     return "{}{}".format(prefix, incremented_suffix)
 
 
+def get_id():
+    list_id = []
+    for i in db.select_all_products():
+        list_id.append(i[0])
+    id = increment_max_number(list_id)
+    return id
+
+
+def increment_max_number_twinse(numbers_list=[]):
+    if not numbers_list:
+        return "CC00000001"
+
+    max_number = max(numbers_list)
+    prefix, suffix = max_number[:2], max_number[2:]
+    incremented_suffix = str(int(suffix) + 1).zfill(len(suffix))
+    return "{}{}".format(prefix, incremented_suffix)
+
+
+def get_id_twinse():
+    list_id = []
+    for i in db.select_all_products_twinse():
+        list_id.append(i[0])
+    id = increment_max_number_twinse(list_id)
+    return id
+
+
 def get_date_now():
     now = datetime.now()
     formatted_date = now.strftime("%d.%m.%y %H:%M")
@@ -53,6 +79,8 @@ def get_data_to_db(data):
     data_db['volume'] = data.get('volume', '')
     data_db['metr'] = data.get('metr', '')
     data_db['drawing'] = data.get('drawing', '')
+    data_db['user_id'] = data.get('user_id', '')
+    data_db['user_descript'] = data.get('user_descript', '')
     return data_db
 
 
@@ -85,7 +113,6 @@ def write_to_db_operation(data_to_db):
 
 
 
-
 def create_data_to_write_in_qr(data):
     data_dict = {}
     if data['type_product'] == 'Проволока':
@@ -97,7 +124,8 @@ def create_data_to_write_in_qr(data):
             "Волочение": data['drawing'],
             "Изготовитель": data['manufacturer'],
             "Дата": data['date_now'],
-            "ID": data['id']
+            "ID": data['id'],
+            "Оператор": data['user_descript']
         }
         return data_dict
     elif data['type_product'] == 'Пластикат':
@@ -107,7 +135,8 @@ def create_data_to_write_in_qr(data):
             "Поставщик": data['supplier'],
             "Изготовитель": data['manufacturer'],
             "Дата": data['date_now'],
-            "ID": data['id']
+            "ID": data['id'],
+            "Оператор": data['user_descript']
         }
 
     elif data['type_product'] == 'Другое':
@@ -117,7 +146,8 @@ def create_data_to_write_in_qr(data):
             "Поставщик": data['supplier'],
             "Изготовитель": data['manufacturer'],
             "Дата": data['date_now'],
-            "ID": data['id']
+            "ID": data['id'],
+            "Оператор": data['user_descript']
         }
 
     elif data['type_product'] == 'изготовить ПУВ':
@@ -140,6 +170,16 @@ def create_data_to_write_in_qr(data):
             "ID": data['id'],
             "Оператор": data['user_descript']
         }
+    elif data['type_product'] == 'изготовить Скрутка':
+        data_dict = {
+            "Изготовлено": "Скрутка",
+            "Наименование": data['name_twin'],
+            "Проволока": data['twist_vein_check'],
+            "Метраж": data['metr'] + " м",
+            "Дата": data['date_now'],
+            "ID": data['id'],
+            "Оператор": data['user_descript']
+        }
     return data_dict
 
 
@@ -154,9 +194,12 @@ def write_to_db(data_to_db):
     volume = data_to_db['volume']
     metr = data_to_db['metr']
     drawing = data_to_db['drawing']
+    user_id = data_to_db['user_id']
+    user_descript = data_to_db['user_descript']
+
     if type_product != 'изготовить ПУВ':
         db.add_automate(id=id, type_product=type_product, wire=wire, plasticat=plasticat, volume=volume, metr=metr,
-                        supplier=supplier, drawing=drawing, manufacturer=manufacturer, date_now=date_now)
+                        supplier=supplier, drawing=drawing, manufacturer=manufacturer, date_now=date_now, user_id=user_id, user_descript=user_descript)
 
 
 def create_data_to_send(data):
@@ -199,12 +242,7 @@ def create_data_to_send(data):
     return data_dict
 
 
-def get_id():
-    list_id = []
-    for i in db.select_all_products():
-        list_id.append(i[0])
-    id = increment_max_number(list_id)
-    return id
+
 
 
 def generate_new_qr_code(code, operations):

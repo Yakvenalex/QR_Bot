@@ -15,3 +15,5 @@ from keyboards.print_code import keyboard_print, keyboard_print_list
 from keyboards.type_vvg import keyboard_type_vvg, keyboard_type_vvg_list
 from keyboards.count_round_vvg import keyboard_count_round, keyboard_count_round_list
 from keyboards.section_round_vvg import keyboard_sec_round_vvg_list, keyboard_sec_round_vvg
+from keyboards.count_twist import keyboard_count_twist
+from keyboards.next_photo import keyboard_next_photo

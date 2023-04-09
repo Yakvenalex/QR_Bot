@@ -44,4 +44,4 @@ def register_handlers_client_main(dp: Dispatcher):
     dp.register_message_handler(handle_start, commands=['start'])
     dp.register_message_handler(restart_fsm, commands=['restart_fsm'],  state='*')
     dp.register_message_handler(generate_qr, commands=['accept_materials'])
-    dp.register_callback_query_handler(type_product, lambda c: c.data in keyboard_type_product_list, state=AcceptState.type_product)
+    dp.register_callback_query_handler(type_product, state=AcceptState.type_product)

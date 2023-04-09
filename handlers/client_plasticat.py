@@ -2,18 +2,14 @@ from aiogram import types, Dispatcher
 from create_bot import bot, AcceptState
 from aiogram.dispatcher import FSMContext
 from get_qr import (get_id, get_date_now, generate_qr_code, get_data_to_db, write_to_db, create_data_to_write_in_qr,
-                    create_data_to_send)
+                    create_data_to_send, find_user_descript)
 from aiogram.types import ParseMode
 from keyboards import (
     keyboard_type_plasticat, keyboard_type_plasticat_list, keyboard_supplier_plasticat_list,
     keyboard_manufacturer, keyboard_manufacturer_list, keyboard_yes_no, keyboard_type_yes_no_list,
-    keyboard_type_product, keyboard_supplier_plasticat
+    keyboard_type_product, keyboard_supplier_plasticat, keyboard_print
 )
-
-
-async def send_qr_code(user_id, data_send):
-    with open(data_send[1], 'rb') as qr:
-        await bot.send_photo(user_id, qr, caption=data_send[0], parse_mode=ParseMode.HTML)
+from async_funck import send_qr_code
 
 
 async def stop_product(user_id):
@@ -108,15 +104,12 @@ async def process_end_plasticat(message: types.Message, state: FSMContext):
 
 
 async def check(callback_query: types.CallbackQuery, state: FSMContext):
+    user_id = callback_query.from_user.id
     if callback_query.data == 'ДА':
         await bot.answer_callback_query(callback_query.id, text=f"ДА!")
         data = await state.get_data()
-        data_db = get_data_to_db(data)
-        write_to_db(data_db)
-        data_dict = create_data_to_write_in_qr(data)
-        data_send = generate_qr_code(data_dict)
-        await send_qr_code(data['user_id'], data_send)
-        await state.finish()
+        await bot.send_message(user_id, dict_to_string(create_data_to_send(data)), reply_markup=keyboard_print)
+        await AcceptState.print_plasticat.set()
     else:
         await bot.answer_callback_query(callback_query.id, text=f"НЕТ!")
         await bot.send_message(callback_query.from_user.id, 'Выберите тип продукта:',
@@ -124,13 +117,26 @@ async def check(callback_query: types.CallbackQuery, state: FSMContext):
         await AcceptState.type_product.set()
 
 
+async def print_plasticat(callback_query: types.CallbackQuery, state: FSMContext):
+    user_id = callback_query.from_user.id
+    if callback_query.data == 'печать':
+        await bot.answer_callback_query(callback_query.id, text=f"сейчас я распечатаю QR-код")
+        await state.update_data(user_id=str(user_id))
+        await state.update_data(user_descript=find_user_descript(str(user_id)))
+        data = await state.get_data()
+        data_db = get_data_to_db(data)
+        write_to_db(data_db)
+        data_dict = create_data_to_write_in_qr(data)
+        data_send = generate_qr_code(data_dict)
+        await send_qr_code(data['user_id'], data_send)
+        await state.finish()
+
+
 def register_handlers_client_plasticat(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(process_supplier, lambda c: c.data in keyboard_supplier_plasticat_list,
-                                       state=AcceptState.supplier_plasticat)
-    dp.register_callback_query_handler(process_manufacturer, lambda c: c.data in keyboard_manufacturer_list,
-                                       state=AcceptState.manufacturer_plasticat)
-    dp.register_callback_query_handler(process_plasticat, lambda c: c.data in keyboard_type_plasticat_list,
-                                       state=AcceptState.plasticat)
+    dp.register_callback_query_handler(process_supplier, state=AcceptState.supplier_plasticat)
+    dp.register_callback_query_handler(process_manufacturer, state=AcceptState.manufacturer_plasticat)
+    dp.register_callback_query_handler(process_plasticat, state=AcceptState.plasticat)
     dp.register_message_handler(process_end_plasticat, state=AcceptState.volume_plasticat)
     dp.register_message_handler(process_plasticat_input, state=AcceptState.waiting_for_plasticat)
-    dp.register_callback_query_handler(check, lambda c: c.data in keyboard_type_yes_no_list, state=AcceptState.check)
+    dp.register_callback_query_handler(check, state=AcceptState.check)
+    dp.register_callback_query_handler(print_plasticat, state=AcceptState.print_plasticat)

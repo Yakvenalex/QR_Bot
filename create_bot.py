@@ -3,7 +3,23 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
+
+
+
+class InspectionStates(StatesGroup):
+    waiting_for_photo = State()
+    waiting_for_next_photo = State()
+
+
+
 class AcceptState(StatesGroup):
+    section_vein_twiste_check = State()
+    find_qr = State()
+    result_metr_twist = State()
+    defect_metr_twist = State()
+    result_create_metr_twist = State()
+    second_yes_twist = State()
+    print_create_twist = State()
     date_now = State()
     id = State()
     type_product = State()
@@ -50,12 +66,21 @@ class AcceptState(StatesGroup):
     photo_vvg_4 = State()
     photo_vvg_5 = State()
     yes_vvg_round = State()
-
-
-
+    print_plasticat = State()
+    print_wire = State()
+    section_twist_pv = State()
+    section_vein_twiste = State()
+    section_metr_twiste_pv = State()
+    photo_twiste_1 = State()
+    photo_twiste_2 = State()
+    photo_twiste_3 = State()
+    photo_twiste_4 = State()
+    photo_twiste_5 = State()
+    yes_twiste = State()
+    photo_twiste = State()
 
 
 storage = MemoryStorage()
-TOKEN = '6144897027:AAEsE9Rzfz2a5KyezQu-n42YKNQm_qMf3wM'
+TOKEN = '6144897027:AAEDnn7a_VQHAhBknhJfjOeB66C0HXyS6So'
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storage)

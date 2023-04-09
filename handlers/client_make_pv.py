@@ -1,13 +1,14 @@
 from aiogram import types, Dispatcher
 from create_bot import bot, AcceptState
 from aiogram.dispatcher import FSMContext
-from keyboards import (keyboard_type_wire_pv_list, keyboard_type_wire_pv, keyboard_yes_no, keyboard_type_yes_no_list,
-                       keyboard_color_pv, keyboard_color_pv_list, keyboard_metr_pv, keyboard_metr_pv_list,
-                       keyboard_create_defect, keyboard_create_defect_list, keyboard_print, keyboard_print_list)
+from keyboards import (keyboard_type_wire_pv, keyboard_yes_no, keyboard_color_pv, keyboard_metr_pv,
+                       keyboard_create_defect, keyboard_print)
 from get_qr import (get_operation_id, get_date_now, generate_qr_code, get_data_to_db_operation, write_to_db_operation,
-                    create_data_to_write_in_qr, create_data_to_send, find_user_descript)
+                    create_data_to_write_in_qr, find_user_descript)
 from qr_scaner import read_qr_code_async
+import os.path
 import os
+from async_funck import send_qr_code
 
 
 async def make_pv_start(message: types.Message):
@@ -21,11 +22,6 @@ async def stop_make_pv(user_id):
     await AcceptState.wire_pv.set()
 
 
-async def send_qr_code(user_id, data_send):
-    with open(data_send[1], 'rb') as qr:
-        await bot.send_photo(user_id, qr, caption=data_send[0])
-
-
 async def handle_photos_and_documents_id(file_id: str, metr: str, wire: str, color: str, message: types.Message,
                                          state: FSMContext):
     # сохраняем фотографию на диск
@@ -36,9 +32,9 @@ async def handle_photos_and_documents_id(file_id: str, metr: str, wire: str, col
     # получаем текст из QR кода
     text = await read_qr_code_async(file_name)
     text = text.split('\n')
-
+    print(text)
     wire_new = text[0].replace("Проволка: ", "")
-    ID_new = text[-2].replace("ID: ", "")
+    ID_new = text[-3].replace("ID: ", "")
     metr_new = text[2].replace("Метраж: ", "").replace(" м", "")
 
     if wire_new == wire:
@@ -215,6 +211,7 @@ async def process_create_metr(message: types.Message, state: FSMContext):
     metr = message.text
     await state.update_data(metr=metr)
     data = await state.get_data()
+    print(data)
     text = f'Изготовлено ПУВ {data["wire"]} {data["color"]} - {data["metr"]}м - ID {data["id_new"]}'
     await bot.send_message(message.from_user.id, text)
     await bot.send_message(message.from_user.id, 'Верно?', reply_markup=keyboard_yes_no)
@@ -252,36 +249,18 @@ async def print_command_1(callback_query: types.CallbackQuery, state: FSMContext
 
 def register_handlers_client_make_pv(dp: Dispatcher):
     dp.register_message_handler(make_pv_start, commands=['make_pv'])
-    dp.register_callback_query_handler(process_wire_pv,
-                                       lambda callback_query: callback_query.data in keyboard_type_wire_pv_list,
-                                       state=AcceptState.wire_pv)
+    dp.register_callback_query_handler(process_wire_pv, state=AcceptState.wire_pv)
     dp.register_message_handler(process_wire_input_pv, state=AcceptState.waiting_for_color_pv)
-    dp.register_callback_query_handler(process_color_pv,
-                                       lambda callback_query: callback_query.data in keyboard_color_pv_list,
-                                       state=AcceptState.color_pv)
-    dp.register_callback_query_handler(process_metr_pv,
-                                       lambda callback_query: callback_query.data in keyboard_metr_pv_list,
-                                       state=AcceptState.metr_pv)
+    dp.register_callback_query_handler(process_color_pv, state=AcceptState.color_pv)
+    dp.register_callback_query_handler(process_metr_pv, state=AcceptState.metr_pv)
     dp.register_message_handler(process_metr_input_pv, state=AcceptState.waiting_for_metr_pv)
     dp.register_message_handler(process_photo_pv, content_types=['photo', 'document'], state=AcceptState.photo_pv)
-    dp.register_callback_query_handler(firs_yes_pv, lambda callback_query: callback_query.data in
-                                                                           keyboard_type_yes_no_list,
-                                       state=AcceptState.first_yes_pv)
-    dp.register_callback_query_handler(create_pv, lambda callback_query: callback_query.data in
-                                                                         keyboard_create_defect_list,
-                                       state=AcceptState.result_create)
+    dp.register_callback_query_handler(firs_yes_pv, state=AcceptState.first_yes_pv)
+    dp.register_callback_query_handler(create_pv, state=AcceptState.result_create)
     dp.register_message_handler(process_create_metr, state=AcceptState.result_create_metr)
-    dp.register_callback_query_handler(second_yes_pv, lambda callback_query: callback_query.data in
-                                                                             keyboard_type_yes_no_list,
-                                       state=AcceptState.second_yes_pv)
-    dp.register_callback_query_handler(print_command_1, lambda callback_query: callback_query.data in
-                                                                               keyboard_print_list,
-                                       state=AcceptState.print_1)
+    dp.register_callback_query_handler(second_yes_pv, state=AcceptState.second_yes_pv)
+    dp.register_callback_query_handler(print_command_1, state=AcceptState.print_1)
     dp.register_message_handler(process_defect_metr, state=AcceptState.defect_metr)
     dp.register_message_handler(process_defect_reason, state=AcceptState.defect_reason)
-    dp.register_callback_query_handler(defect_yes_no, lambda callback_query: callback_query.data in
-                                                                             keyboard_type_yes_no_list,
-                                       state=AcceptState.defect_yes_no)
-    dp.register_callback_query_handler(print_defect, lambda callback_query: callback_query.data in
-                                                                            keyboard_print_list,
-                                       state=AcceptState.print_2)
+    dp.register_callback_query_handler(defect_yes_no, state=AcceptState.defect_yes_no)
+    dp.register_callback_query_handler(print_defect, state=AcceptState.print_2)
