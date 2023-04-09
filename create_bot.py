@@ -13,6 +13,9 @@ class InspectionStates(StatesGroup):
 
 
 class AcceptState(StatesGroup):
+    photo_vvg_round = State()
+    section_vein_round_check_hand = State()
+    section_vein_round_hand = State()
     restart_round_vvg = State()
     firs_yes_no_vvg = State()
     metr_vvg_round = State()

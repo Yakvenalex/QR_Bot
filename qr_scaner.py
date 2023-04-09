@@ -16,6 +16,6 @@ async def read_qr_code_async(filename):
         except IndexError:
             return ""
 
-    image = cv2.imread(os.path.join(dir_path, 'photos', file_name))
+    image = cv2.imread(os.path.join(dir_path, file_name))
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, get_text, image)

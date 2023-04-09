@@ -74,3 +74,15 @@ def check_color(*args):
 
 def check_wire(*args):
     return all(val == args[0] for val in args)
+
+
+async def stop_script(call_id, user_id, state=None, keyboard=None):
+    await bot.answer_callback_query(call_id, text="Возвращаюсь на начало скрипта")
+    await bot.send_message(user_id, 'Выберите из списка по форме:',
+                           reply_markup=keyboard)
+    await state
+
+
+async def step_back(user_id, text, state=None, keyboard=None):
+    await bot.send_message(user_id, text, reply_markup=keyboard)
+    await state

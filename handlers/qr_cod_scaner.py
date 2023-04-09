@@ -4,7 +4,7 @@ from aiogram import types, Dispatcher
 from create_bot import bot, AcceptState
 from aiogram.dispatcher import FSMContext
 from sqlite import Database
-
+import requests
 
 def generate_output_string(data_tuple):
     product = data_tuple[1] + ': ' + data_tuple[3]
@@ -28,31 +28,52 @@ def find_qr_code_in_bd(qr_id):
     return 'qr_код не найден'
 
 
-
+# async def handle_photos_and_documents(message: types.Message):
+#     # check if the sent file is an image
+#     if message.content_type == types.ContentType.PHOTO:
+#         file_id = message.photo[-1].file_id
+#     elif message.content_type == types.ContentType.DOCUMENT and message.document.mime_type.startswith('image/'):
+#         file_id = message.document.file_id
+#     else:
+#         return
+#
+#     # save the photo to disk
+#     file_path = await bot.get_file(file_id)
+#
+#     file_name = os.path.basename(file_path.file_path)
+#     await bot.download_file(file_path.file_path, os.path.join(os.getcwd(), 'photos', file_name))
+#
+#     # get text from QR code
+#     text = await read_qr_code_async(file_name)
+#
+#     if not text:
+#         # If the QR code could not be read, display a message and request the ID manually
+#         await message.reply("Could not scan QR code. Please enter ID manually: ")
+#         await AcceptState.find_qr.set()
+#     else:
+#         # send text to user
+#         await message.reply(text)
+#
 
 async def handle_photos_and_documents(message: types.Message):
-    # проверяем, является ли отправленный файл изображением
+    # check if the sent file is an image
     if message.content_type == types.ContentType.PHOTO:
         file_id = message.photo[-1].file_id
     elif message.content_type == types.ContentType.DOCUMENT and message.document.mime_type.startswith('image/'):
         file_id = message.document.file_id
     else:
         return
-
-    # сохраняем фотографию на диск
-    file_path = await bot.get_file(file_id)
-    file_name = file_path.file_path.split('/')[-1]
-    await bot.download_file(file_path.file_path, os.path.join(os.getcwd(), 'photos', file_name))
-
-    # получаем текст из QR кода
-    text = await read_qr_code_async(file_name)
-
+    file = await bot.get_file(file_id)
+    file_path = file.file_path
+    photo_path = f"photos\photo_{file_id[1:5]}.png"  # генерируем уникальное имя файла для сохранения
+    await bot.download_file(file_path, photo_path)
+    text = await read_qr_code_async(photo_path)
     if not text:
-        # Если QR код не удалось прочитать, выводим сообщение и запрашиваем ID вручную
-        await message.reply("Не удалось отсканировать QR код. Введите ID вручную: ")
+        # If the QR code could not be read, display a message and request the ID manually
+        await message.reply("Could not scan QR code. Please enter ID manually: ")
         await AcceptState.find_qr.set()
     else:
-        # отправляем текст пользователю
+        # send text to user
         await message.reply(text)
 
 
