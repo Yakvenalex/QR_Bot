@@ -13,6 +13,12 @@ class InspectionStates(StatesGroup):
 
 
 class AcceptState(StatesGroup):
+    restart_round_vvg = State()
+    firs_yes_no_vvg = State()
+    metr_vvg_round = State()
+    section_vein_round_check = State()
+    section_vein_round = State()
+    count_round_vvg = State()
     section_vein_twiste_check = State()
     find_qr = State()
     result_metr_twist = State()
