@@ -105,9 +105,9 @@ async def process_metr_vvg(message: types.Message, state: FSMContext):
     await AcceptState.photo_vvg_round.set()
 
 
-@dp.message_handler(content_types=[types.ContentType.PHOTO, types.ContentType.DOCUMENT], state=AcceptState.photo_vvg_round)
+@dp.message_handler(content_types=[types.ContentType.PHOTO, types.ContentType.DOCUMENT],
+                    state=AcceptState.photo_vvg_round)
 async def process_photo_vvg(message: types.Message, state: FSMContext):
-
     if message.content_type == types.ContentType.PHOTO:
         file_id = message.photo[-1].file_id
     elif message.content_type == types.ContentType.DOCUMENT and message.document.mime_type.startswith('image/'):
@@ -119,7 +119,10 @@ async def process_photo_vvg(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
     info = await handle_photos_and_documents_id(file_id, message, state)
-    await bot.send_message(message.from_user.id, f'{info} -- {data}', reply_markup=keyboard_yes_no)
+    new_text = f'Изготовить ВВГ-Пнг(А)-LS {data["count_round"]}х{data["vein_round"]} - ' \
+               f'{data["section_vein_round_check"]} - заготовка ID {info[-3].replace("ID: ")} верно?'
+    await bot.send_message(message.from_user.id, new_text, reply_markup=keyboard_yes_no)
+    await AcceptState.yes_vvg_round.set()
 
 
 @dp.callback_query_handler(state=AcceptState.yes_vvg_round)
