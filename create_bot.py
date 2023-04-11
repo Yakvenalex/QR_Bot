@@ -90,6 +90,6 @@ class AcceptState(StatesGroup):
 
 
 storage = MemoryStorage()
-TOKEN = '6144897027:AAEDnn7a_VQHAhBknhJfjOeB66C0HXyS6So'
+TOKEN = '6144897027:AAFgOCP_e1QJD6etNJU6XDLwiGh4OMweSVk'
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storage)

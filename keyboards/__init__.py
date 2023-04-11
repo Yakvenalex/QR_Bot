@@ -17,3 +17,7 @@ from keyboards.count_round_vvg import keyboard_count_round, keyboard_count_round
 from keyboards.section_round_vvg import keyboard_sec_round_vvg_list, keyboard_sec_round_vvg
 from keyboards.count_twist import keyboard_count_twist
 from keyboards.next_photo import keyboard_next_photo
+from keyboards.type_rewind import keyboard_type_rewind
+from keyboards.type_rewind_2 import keyboard_type_rewind_2
+from keyboards.result_work_tara import keyboard_create_defect_tara
+from keyboards.type_stop_q import keyboard_stop_tara

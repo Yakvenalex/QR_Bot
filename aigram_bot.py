@@ -1,7 +1,7 @@
 from aiogram.utils import executor
 from create_bot import dp, bot
 from handlers import client_plasticat, client_wire, client_main, qr_cod_scaner, admin, other_type, client_make_pv, \
-    client_make_vvg, client_make_twist, client_inspection
+    client_make_vvg, client_make_twist, client_inspection, client_rewind
 
 async def on_startup(_):
     print('Бот вышел в онлайн')
